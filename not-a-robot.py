@@ -9,9 +9,17 @@ import discord as dc
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
 
 client = dc.Client()
 
 @client.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    for guild in client.guilds:
+        if guild.name == GUILD:
+            break
+
+    print(f'{client.user} has connected to the following server:\n'
+          f'{guild.name} (id: {guild.id})')
+
+client.run(TOKEN)
