@@ -16,7 +16,7 @@ class Admin(commands.Cog):
         self.bot = bot
     
     @commands.command(name='blacklist', aliases=['Blacklist'], help='Blacklist a user from being able to DM the admins')
-    async def blacklist(self, ctx, member: dc.Member=None):
+    async def blacklist(self, ctx: commands.Context, member: dc.Member=None):
         is_admin = False
         guild = dc.utils.find(lambda g: g.name == GUILD, self.bot.guilds)
 
@@ -31,7 +31,11 @@ class Admin(commands.Cog):
                 is_admin = True
         if is_admin:  
             if member in guild.members:
-                await ctx.send("Blacklisting user... (don't worry this is just a test)")
+                await ctx.send("Blacklisting user... (test function)")
+                with open('blacklist.txt', 'a') as f:
+                    f.write(member)
+                    f.write('\n')
+                await ctx.send("User added to blacklist.")
 
     @blacklist.error
     async def kick_error(self, ctx: commands.Context, error: commands.CommandError):

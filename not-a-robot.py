@@ -70,6 +70,7 @@ async def on_message(message: dc.Message):
         for admin in admins:
             await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
             await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
+        await message.author.send("DM sent!")
     await bot.process_commands(message)
         
 
