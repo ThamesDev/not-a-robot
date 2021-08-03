@@ -24,8 +24,9 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 
 if __name__ == '__main__':
     for extension in initial_extensions:
-        print("Extensions enabled")
         bot.load_extension(extension)
+        print(extension)
+    print("Extensions enabled")
 
 @bot.event
 async def on_ready():
