@@ -56,7 +56,7 @@ async def on_member_join(member):
     )
 
 @bot.event
-async def on_message(message):
+async def on_message(message: dc.Message):
     admins = []
 
     guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
@@ -64,11 +64,12 @@ async def on_message(message):
         for role in member.roles:
             if role.name == "administrator" or role.name == "owner":
                 admins.append(member)
+                
     if message.guild is None and message.author != bot.user:
         await message.author.send("Sending DM...")
         for admin in admins:
             await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
-            await admin.send(f'If you want to blacklist this user, simply type `$blacklist @User#0001`, replacing that with the user\'s username and ID')
+            await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
     await bot.process_commands(message)
         
 
