@@ -4,7 +4,8 @@
 #       user blacklist, bug reporting
 
 from math import remainder
-from discord import channel, file
+from discord import channel, file, guild, user
+from discord.abc import User
 from dotenv import load_dotenv
 import os, sys, traceback
 import discord as dc
@@ -17,7 +18,9 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 initial_extensions = ['cogs.fun']
 
-bot = commands.Bot(command_prefix='$')
+intents = dc.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 if __name__ == '__main__':
     for extension in initial_extensions:
@@ -30,8 +33,8 @@ async def on_ready():
     print(f'{bot.user} has connected to the following server:\n'
           f'{guild.name} (id: {guild.id})')
     
-    members = '\n - '.join([member.name for member in guild.members])
-    print(f'Guild Members:\n - {members}')
+    members = ', '.join([member.name for member in guild.members])
+    print(f'Guild Members:\n{members}')
     send_channel = bot.get_channel(850642371318513684)
     game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
 
@@ -50,12 +53,33 @@ async def on_member_join(member):
 
 @bot.event
 async def on_message(message):
-    print(message)
-    # with open('admins.txt', 'a') as file:
-    #     file.write(user)
-    # if dc.User in admins
-    # if message.guild is None and message.author != bot.user:
-    #     print(dc.User)
+    # added_admin = False
+    # is_admin = False
+
+    #     if str(message.author) in admins:
+    #         added_admin = True
+    #         print(f'{message.author} is an admin.')
+    #         if message.content.startswith("$add "):
+    #             with open('admins.txt', 'a') as f:
+    #                 f.write(message.content[6:])
+    #         elif message.content.startswith("$ add "):
+    #             with open('admins.txt', 'a') as f:
+    #                 f.write(message.content[7:])
+    #         else:
+    #             added_admin = False
+    
+    admins = []
+
+    guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
+    for member in guild.members:
+        for role in member.roles:
+            if role.name == "administrator" or role.name == "owner":
+                admins.append(member)
+    if message.guild is None and message.author != bot.user:
+        await message.author.send("Sending DM...")
+        for admin in admins:
+            await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
+            await admin.send(f'If you want to blacklist this user, simply type `$blacklist @User#0001`, replacing that with the user\'s username and ID')
         
 
 @bot.event
