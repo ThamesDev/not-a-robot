@@ -24,6 +24,7 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 
 if __name__ == '__main__':
     for extension in initial_extensions:
+        print("Extensions enabled")
         bot.load_extension(extension)
 
 @bot.event
@@ -34,7 +35,7 @@ async def on_ready():
           f'{guild.name} (id: {guild.id})')
     
     members = ', '.join([member.name for member in guild.members])
-    print(f'Guild Members:\n{members}')
+    # print(f'Guild Members:\n{members}')
     send_channel = bot.get_channel(850642371318513684)
     game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
 
@@ -80,6 +81,7 @@ async def on_message(message):
         for admin in admins:
             await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
             await admin.send(f'If you want to blacklist this user, simply type `$blacklist @User#0001`, replacing that with the user\'s username and ID')
+    await bot.process_commands(message)
         
 
 @bot.event
