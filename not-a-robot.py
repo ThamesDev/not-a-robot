@@ -12,19 +12,22 @@ import discord as dc
 from discord.ext import commands
 from random import choice
 
+def get_prefix(bot, message):
+    prefixes = ['$'] # This is expandable (hence the list)
+    return commands.when_mentioned_or(*prefixes)(bot, message)
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-initial_extensions = ['cogs.fun']
+initial_extensions = ['cogs.fun', 'cogs.admin']
 
 intents = dc.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
 if __name__ == '__main__':
     for extension in initial_extensions:
-        print("Extensions enabled")
         bot.load_extension(extension)
 
 @bot.event
@@ -54,21 +57,6 @@ async def on_member_join(member):
 
 @bot.event
 async def on_message(message):
-    # added_admin = False
-    # is_admin = False
-
-    #     if str(message.author) in admins:
-    #         added_admin = True
-    #         print(f'{message.author} is an admin.')
-    #         if message.content.startswith("$add "):
-    #             with open('admins.txt', 'a') as f:
-    #                 f.write(message.content[6:])
-    #         elif message.content.startswith("$ add "):
-    #             with open('admins.txt', 'a') as f:
-    #                 f.write(message.content[7:])
-    #         else:
-    #             added_admin = False
-    
     admins = []
 
     guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)

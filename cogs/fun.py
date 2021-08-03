@@ -8,8 +8,8 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(name='mulaney', aliases=[' mulaney', 'Mulaney', ' Mulaney'], help='Responds with a random John Mulaney quote!')
-    async def mulaney_gen(ctx):
+    @commands.command(name='mulaney', aliases=['Mulaney'], help='Responds with a random John Mulaney quote!')
+    async def mulaney_gen(self, ctx):
         mulaney_quotes = [
             'I was always the squarest person in the cool room, and alternatively, sometimes the weirder person at the mainstream table.',
             'Things have to be funny first, and if they want to have a point, that’s awesome.',
