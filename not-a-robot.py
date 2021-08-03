@@ -39,6 +39,7 @@ async def on_member_join(member):
         f'more people! To prove, _prove_ you\'re not a robot, just check out the #rules and then jump into #main-chat!'
     )
 
+@client.event
 async def on_message(message):
     if message.author == client.user:
         return
@@ -73,6 +74,15 @@ async def on_message(message):
 
     if message.content == '$mulaney':
         response = choice(mulaney_quotes)
+        print(f'Outputting message {response}')
         await message.channel.send(response)
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    with open('err.log', 'a') as f:
+        if event == 'on_message':
+            f.write(f'Unhandled message: {args[0]}\n')
+        else:
+            raise
 
 client.run(TOKEN)
