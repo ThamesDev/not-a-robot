@@ -20,7 +20,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-initial_extensions = ['cogs.fun']
+initial_extensions = ['cogs.fun', 'cogs.admin']
 
 intents = dc.Intents.default()
 intents.members = True
@@ -45,54 +45,39 @@ async def on_ready():
     await bot.change_presence(status=dc.Status.idle, activity=game)
     await send_channel.send("NotARobot is online!")
 
-# @bot.event
-# async def on_member_join(member):
-#     guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
-#     channel = bot.get_channel(850634285975076904)
-#     await channel.send(
-#         f'Hi {member.name}, welcome to the John Mulaney Discord server!'
-#         f'You\'ll have tons of fun talking about Mulaney with {len(guild.members)}'
-#         f'more people! To prove, _prove_ you\'re not a robot, just check out the #rules and then jump into #main-chat!'
-#     )
+@bot.event
+async def on_member_join(member):
+    guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
+    channel = bot.get_channel(850634285975076904)
+    await channel.send(
+        f'Hi {member.name}, welcome to the John Mulaney Discord server!'
+        f'You\'ll have tons of fun talking about Mulaney with {len(guild.members)}'
+        f'more people! To prove, _prove_ you\'re not a robot, just check out the #rules and then jump into #main-chat!'
+    )
 
-# @bot.event
-# async def on_message(message):
-# #     added_admin = False
-# #     is_admin = False
+@bot.event
+async def on_message(message):
+    admins = []
 
-# #         if str(message.author) in admins:
-# #             added_admin = True
-# #             print(f'{message.author} is an admin.')
-# #             if message.content.startswith("$add "):
-# #                 with open('admins.txt', 'a') as f:
-# #                     f.write(message.content[6:])
-# #             elif message.content.startswith("$ add "):
-# #                 with open('admins.txt', 'a') as f:
-# #                     f.write(message.content[7:])
-# #             else:
-# #                 added_admin = False
-    
-#     admins = []
-
-#     guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
-#     for member in guild.members:
-#         for role in member.roles:
-#             if role.name == "administrator" or role.name == "owner":
-#                 admins.append(member)
-#     if message.guild is None and message.author != bot.user:
-#         await message.author.send("Sending DM...")
-#         for admin in admins:
-#             await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
-#             await admin.send(f'If you want to blacklist this user, simply type `$blacklist @User#0001`, replacing that with the user\'s username and ID')
-#     await bot.process_commands(message)
+    guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
+    for member in guild.members:
+        for role in member.roles:
+            if role.name == "administrator" or role.name == "owner":
+                admins.append(member)
+    if message.guild is None and message.author != bot.user:
+        await message.author.send("Sending DM...")
+        for admin in admins:
+            await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
+            await admin.send(f'If you want to blacklist this user, simply type `$blacklist @User#0001`, replacing that with the user\'s username and ID')
+    await bot.process_commands(message)
         
 
-# @bot.event
-# async def on_error(event, *args, **kwargs):
-#     with open('err.log', 'a') as f:
-#         if event == 'on_message':
-#             f.write(f'Unhandled message: {args[0]}\n')
-#         else:
-#             raise
+@bot.event
+async def on_error(event, *args, **kwargs):
+    with open('err.log', 'a') as f:
+        if event == 'on_message':
+            f.write(f'Unhandled message: {args[0]}\n')
+        else:
+            raise
 
 bot.run(TOKEN, bot=True, reconnect=True)
