@@ -49,10 +49,10 @@ async def on_member_join(member):
     )
 
 @bot.event
-async def on_message(message, user: dc.User):
-    print(user)
-    with open('admins.txt', 'a') as file:
-        file.write(user)
+async def on_message(message):
+    print(message)
+    # with open('admins.txt', 'a') as file:
+    #     file.write(user)
     # if dc.User in admins
     # if message.guild is None and message.author != bot.user:
     #     print(dc.User)
