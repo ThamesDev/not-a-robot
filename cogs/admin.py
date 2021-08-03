@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.errors import MemberNotFound
 from dotenv import load_dotenv
-from os import getenv
+from os import getenv, write
 
 from discord.ext.commands import bot
 
@@ -56,8 +56,18 @@ class Admin(commands.Cog):
         if is_admin:  
             if member in guild.members:
                 await ctx.send("Whitelisting user...")
+                
                 read_blacklist = open('blacklist.txt', 'r')
+                lines = read_blacklist.readlines()
+                read_blacklist.close()
+
                 write_blacklist = open('blacklist.txt', 'w')
+
+                for line in lines:
+                    if line.strip('\n') != str(member):
+                        write_blacklist.write(line)
+                write_blacklist.close()
+                
                 await ctx.send("User removed from blacklist.")
 
     @whitelist.error

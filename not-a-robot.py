@@ -66,7 +66,7 @@ async def on_message(message: dc.Message):
             if role.name == "administrator" or role.name == "owner":
                 admins.append(member)
                 
-    if message.guild is None and message.author != bot.user:
+    if message.guild is None and message.author != bot.user and str(message.content)[0] != '$':
         if str(message.author) in blacklist:
             await message.author.send("You have been added to the blacklist. You cannot send a DM to the admin team!")
             return
