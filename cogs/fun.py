@@ -2,7 +2,7 @@ import discord as dc
 from discord.ext import commands
 from random import choice
 
-class FunCog(commands.Cog):
+class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -40,4 +40,4 @@ class FunCog(commands.Cog):
         await ctx.send(response)
 
 def setup(bot):
-    bot.add_cog(FunCog(bot))
+    bot.add_cog(Fun(bot))
