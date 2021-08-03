@@ -15,9 +15,7 @@ client = dc.Client()
 
 @client.event
 async def on_ready():
-    for guild in client.guilds:
-        if guild.name == GUILD:
-            break
+    guild = dc.utils.find(lambda g: g.name == GUILD, client.guilds)
 
     print(f'{client.user} has connected to the following server:\n'
           f'{guild.name} (id: {guild.id})')
