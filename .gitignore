@@ -1,3 +1,4 @@
 .env
 err.log
 cogs/__pycache__/
+blacklist.txt
