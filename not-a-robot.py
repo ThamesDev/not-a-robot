@@ -3,6 +3,7 @@
 # TODO: forward message from user to mods, add mod list and enable mods to add more, server interface, Mulaney quotes,
 #       user blacklist, bug reporting
 
+from math import remainder
 from discord import channel
 from dotenv import load_dotenv
 import os
@@ -14,36 +15,32 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-client = dc.Client()
+bot = commands.Bot(command_prefix='$')
 
-@client.event
+@bot.event
 async def on_ready():
-    guild = dc.utils.find(lambda g: g.name == GUILD, client.guilds)
+    guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
 
-    print(f'{client.user} has connected to the following server:\n'
+    print(f'{bot.user} has connected to the following server:\n'
           f'{guild.name} (id: {guild.id})')
     
     members = '\n - '.join([member.name for member in guild.members])
     print(f'Guild Members:\n - {members}')
-    send_channel = client.get_channel(850642371318513684)
+    send_channel = bot.get_channel(850642371318513684)
     await send_channel.send("NotARobot is online!")
 
-@client.event
+@bot.event
 async def on_member_join(member):
-    await member.create_dm()
-    guild = dc.utils.find(lambda g: g.name == GUILD, client.guilds)
-    channel = client.get_channel(850634285975076904)
+    guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
+    channel = bot.get_channel(850634285975076904)
     await channel.send(
         f'Hi {member.name}, welcome to the John Mulaney Discord server!'
         f'You\'ll have tons of fun talking about Mulaney with {len(guild.members)}'
         f'more people! To prove, _prove_ you\'re not a robot, just check out the #rules and then jump into #main-chat!'
     )
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
+@bot.command(name='mulaney', help='Responds with a random John Mulaney quote!')
+async def mulaney_gen(ctx):
     mulaney_quotes = [
         'I was always the squarest person in the cool room, and alternatively, sometimes the weirder person at the mainstream table.',
         'Things have to be funny first, and if they want to have a point, that’s awesome.',
@@ -72,14 +69,10 @@ async def on_message(message):
         'If it’s something very, very funny but possibly controversial, if it’s truly funny, then it’s worth doing. Things aren’t worth doing for the sake of being controversial.'
     ]
 
-    if message.content == '$mulaney':
-        response = choice(mulaney_quotes)
-        print(f'Outputting message {response}')
-        await message.channel.send(response)
-    elif message.content == 'raise-exception':
-        raise dc.DiscordException
+    response = choice(mulaney_quotes)
+    await ctx.send(response)
 
-@client.event
+@bot.event
 async def on_error(event, *args, **kwargs):
     with open('err.log', 'a') as f:
         if event == 'on_message':
@@ -87,4 +80,4 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-client.run(TOKEN)
+bot.run(TOKEN)
