@@ -4,7 +4,7 @@
 #       user blacklist, bug reporting
 
 from math import remainder
-from discord import channel
+from discord import channel, file
 from dotenv import load_dotenv
 import os, sys, traceback
 import discord as dc
@@ -47,6 +47,16 @@ async def on_member_join(member):
         f'You\'ll have tons of fun talking about Mulaney with {len(guild.members)}'
         f'more people! To prove, _prove_ you\'re not a robot, just check out the #rules and then jump into #main-chat!'
     )
+
+@bot.event
+async def on_message(message, user: dc.User):
+    print(user)
+    with open('admins.txt', 'a') as file:
+        file.write(user)
+    # if dc.User in admins
+    # if message.guild is None and message.author != bot.user:
+    #     print(dc.User)
+        
 
 @bot.event
 async def on_error(event, *args, **kwargs):
