@@ -33,7 +33,9 @@ async def on_ready():
     members = '\n - '.join([member.name for member in guild.members])
     print(f'Guild Members:\n - {members}')
     send_channel = bot.get_channel(850642371318513684)
-    await bot.change_presence(game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/'))
+    game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
+
+    await bot.change_presence(status=dc.Status.idle, activity=game)
     await send_channel.send("NotARobot is online!")
 
 @bot.event
