@@ -43,7 +43,7 @@ async def on_ready():
     game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
 
     await bot.change_presence(status=dc.Status.idle, activity=game)
-    await send_channel.send("NotARobot is online!")
+    # await send_channel.send("NotARobot is online!")
 
 @bot.event
 async def on_member_join(member):
@@ -58,6 +58,7 @@ async def on_member_join(member):
 @bot.event
 async def on_message(message: dc.Message):
     admins = []
+    blacklist = open("blacklist.txt").read().splitlines()
 
     guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
     for member in guild.members:
@@ -66,6 +67,9 @@ async def on_message(message: dc.Message):
                 admins.append(member)
                 
     if message.guild is None and message.author != bot.user:
+        if str(message.author) in blacklist:
+            await message.author.send("You have been added to the blacklist. You cannot send a DM to the admin team!")
+            return
         await message.author.send("Sending DM...")
         for admin in admins:
             await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')

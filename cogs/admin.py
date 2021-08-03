@@ -23,25 +23,47 @@ class Admin(commands.Cog):
         if member == None:
             await ctx.send("Error: you must select a user to blacklist!\nThe syntax is\n```\n$blacklist @User\n```")
             return
-
-        print(member)
         
         for role in ctx.author.roles:
             if role.name == "administrator" or role.name == "owner":
                 is_admin = True
         if is_admin:  
             if member in guild.members:
-                await ctx.send("Blacklisting user... (test function)")
+                await ctx.send("Blacklisting user...")
                 with open('blacklist.txt', 'a') as f:
-                    f.write(member)
+                    f.write(str(member))
                     f.write('\n')
                 await ctx.send("User added to blacklist.")
 
     @blacklist.error
     async def kick_error(self, ctx: commands.Context, error: commands.CommandError):
-        print("At least this is running...")
         if isinstance(error, commands.MemberNotFound):
-            print("An exception has occured!")
+            print("Error: a handled exception has occured!")
+            await ctx.send("Error: guild member not found!")
+
+    @commands.command(name='whitelist', aliases=['Whitelist'], help='Un-blacklist a user so they can DM the admins again')
+    async def whitelist(self, ctx: commands.Context, member: dc.Member=None):
+        is_admin = False
+        guild = dc.utils.find(lambda g: g.name == GUILD, self.bot.guilds)
+
+        if member == None:
+            await ctx.send("Error: you must select a user to whitelist!\nThe syntax is\n```\n$whitelist @User\n```")
+            return
+        
+        for role in ctx.author.roles:
+            if role.name == "administrator" or role.name == "owner":
+                is_admin = True
+        if is_admin:  
+            if member in guild.members:
+                await ctx.send("Whitelisting user...")
+                read_blacklist = open('blacklist.txt', 'r')
+                write_blacklist = open('blacklist.txt', 'w')
+                await ctx.send("User removed from blacklist.")
+
+    @whitelist.error
+    async def kick_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.MemberNotFound):
+            print("Error: a handled exception has occured!")
             await ctx.send("Error: guild member not found!")
 
 def setup(bot):
