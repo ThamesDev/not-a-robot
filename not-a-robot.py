@@ -76,6 +76,8 @@ async def on_message(message):
         response = choice(mulaney_quotes)
         print(f'Outputting message {response}')
         await message.channel.send(response)
+    elif message.content == 'raise-exception':
+        raise dc.DiscordException
 
 @client.event
 async def on_error(event, *args, **kwargs):
