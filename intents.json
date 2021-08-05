@@ -1,0 +1,19 @@
+{"intents": [
+    {"tag": "greeting",
+    "patterns": ["Hi", "Hello", "What's up", "Hey", "How are you", "How is your day?"],
+    "responses": ["Hey, how can I help?", "Oh hi, what's up?", "Hi, how are you?", "Hi! What can I do for you today?", "Hello! I'm NotARobot. What can I do for you?"],
+    "context_set": ""
+    },
+    {"tag": "question",
+    "patterns": ["What can you do", "What do you do", "Help", "Commands", "list commands", "Show me what you can do"],
+    "responses": ["I can send a DM to the admin team from here, or you can type $help for my commands.", "You can tell me to send a DM to the mod team, or type $help to list my commands!", "I can forward your DM to the admin team, and you can type $help for a list of commands!"]
+    },
+    {"tag": "dm",
+    "patterns": ["Send a DM", "DM the admin team", "DM the mod team", "send a message", "Talk to the mods", "Tell the mods"],
+    "responses": ["OK, what would you like to send?", "What should the message be?", "Sure, what should I tell them?", "Of course, what would you like to send?"]
+    },
+    {"tag": "farewell",
+    "patterns": ["bye", "goodbye", "see you later", "adios", "good day", "See you tomorrow!", "cheerio", "toodle pip"],
+    "responses": ["See ya!", "OK, bye!", "Catch you later!", "Adios", "So long, friend"]
+    }
+]}

@@ -11,6 +11,8 @@ import os, sys, traceback
 import discord as dc
 from discord.ext import commands
 from random import choice
+import network as nw
+import json
 
 def get_prefix(bot, message):
     prefixes = ['$'] # This is expandable (hence the list)
@@ -43,7 +45,7 @@ async def on_ready():
     game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
 
     await bot.change_presence(status=dc.Status.idle, activity=game)
-    # await send_channel.send("NotARobot is online!")
+    await send_channel.send("NotARobot is online!")
 
 @bot.event
 async def on_member_join(member):
@@ -57,6 +59,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_message(message: dc.Message):
+    network = nw.NeuralNetwork()
     admins = []
     blacklist = open("blacklist.txt").read().splitlines()
 
