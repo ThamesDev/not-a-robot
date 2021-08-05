@@ -210,12 +210,13 @@ while True:
             break
     except IndexError:
         print("I'm not sure what that means...")
-        with open('unknown.json', 'r+') as file:
+        with open('unknown.json') as file:
             unknown = json.load(file)
             if sentence in unknown:
                 unknown[sentence] += 1
             else:
                 unknown[sentence] = 1
+        with open('unknown.json', 'w') as file:
             json.dump(unknown, file, indent=4, sort_keys=True)
         print("saved unknown sentence to: unknown.json")
             
