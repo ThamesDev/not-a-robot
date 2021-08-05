@@ -179,18 +179,23 @@ y = np.array(output)
 network = NeuralNetwork()
 start_time = time.time()
 
-overwrite = False
+overwrite = True
 
-with open(network.synapse_file) as data_file: 
-    synapse = json.load(data_file) 
-    synapse_0 = np.asarray(synapse['synapse0']) 
-    synapse_1 = np.asarray(synapse['synapse1'])
+if not overwrite:
+    with open(network.synapse_file) as data_file: 
+        synapse = json.load(data_file) 
+        synapse_0 = np.asarray(synapse['synapse0']) 
+        synapse_1 = np.asarray(synapse['synapse1'])
 
-network.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=True) # , synapse_0=synapse_0, synapse_1=synapse_1
+network.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=overwrite) # , synapse_0=synapse_0, synapse_1=synapse_1
 
 if overwrite:
     elapsed_time = time.time() - start_time
     print("processing time:", elapsed_time, "seconds")
+    with open(network.synapse_file) as data_file: 
+        synapse = json.load(data_file) 
+        synapse_0 = np.asarray(synapse['synapse0']) 
+        synapse_1 = np.asarray(synapse['synapse1'])
 
 while True:
     sentence = input("> ")
@@ -212,12 +217,14 @@ while True:
         print("I'm not sure what that means...")
         with open('unknown.json') as file:
             unknown = json.load(file)
-            if sentence in unknown:
-                unknown[sentence] += 1
-            else:
-                unknown[sentence] = 1
+        sentence = sentence.lower()
+        if sentence in unknown:
+            unknown[sentence] += 1
+        else:
+            unknown[sentence] = 1
+        unknown = {k: v for k, v in sorted(unknown.items(), key=lambda item: item[1], reverse=True)}
         with open('unknown.json', 'w') as file:
-            json.dump(unknown, file, indent=4, sort_keys=True)
+            json.dump(unknown, file, indent=4, sort_keys=False)
         print("saved unknown sentence to: unknown.json")
             
     
