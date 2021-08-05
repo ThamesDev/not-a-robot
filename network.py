@@ -186,7 +186,7 @@ with open(network.synapse_file) as data_file:
     synapse_0 = np.asarray(synapse['synapse0']) 
     synapse_1 = np.asarray(synapse['synapse1'])
 
-network.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=False, synapse_0=synapse_0, synapse_1=synapse_1)
+network.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=True) # , synapse_0=synapse_0, synapse_1=synapse_1
 
 if overwrite:
     elapsed_time = time.time() - start_time
@@ -211,8 +211,12 @@ while True:
     except IndexError:
         print("I'm not sure what that means...")
         with open('unknown.json', 'r+') as file:
-            training_data = json.load(file)
-            json.dump(synapse, file, indent=4, sort_keys=True)
-        print("saved synapses to:", self.synapse_file)
+            unknown = json.load(file)
+            if sentence in unknown:
+                unknown[sentence] += 1
+            else:
+                unknown[sentence] = 1
+            json.dump(unknown, file, indent=4, sort_keys=True)
+        print("saved unknown sentence to: unknown.json")
             
     
