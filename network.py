@@ -1,4 +1,5 @@
 import enum
+from io import StringIO
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
 
@@ -11,8 +12,75 @@ import time
 stemmer = LancasterStemmer()
 
 class NeuralNetwork():
+    def __init__(self) -> None:
+        self.synapse_file = "synapses.json"
 
-    synapse_file = "synapses.json"
+        with open('intents.json') as json_data:
+            self.training_data = json.load(json_data)
+
+        self.words = []
+        self.classes = []
+        self.documents = []
+        self.ignore_words = ['?', '\'', '!', '.', ',', 'to', 'a', 'the']
+
+        for intent in self.training_data['intents']:
+            for pattern in intent['patterns']:
+                w = nltk.word_tokenize(pattern)
+
+                self.words.extend(w)
+                self.documents.append((w, intent['tag']))
+
+                if intent['tag'] not in self.classes:
+                    self.classes.append(intent['tag'])
+
+        self.words = [stemmer.stem(w.lower()) for w in self.words if w not in self.ignore_words]
+        self.words = sorted(list(set(self.words)))
+
+        self.classes = sorted(list(set(self.classes)))
+
+        print (len(self.documents), "documents", self.documents)
+        print (len(self.classes), "classes", self.classes)
+        print (len(self.words), "unique stemmed words", self.words)
+
+        training = []
+        output = []
+
+        output_empty = [0] * len(self.classes)
+
+        for doc in self.documents:
+            bag = []
+            pattern_words = doc[0]
+            pattern_words = [stemmer.stem(word.lower()) for word in pattern_words]
+            for w in self.words:
+                bag.append(1) if w in pattern_words else bag.append(0)
+            
+            training.append(bag)
+            output_row = list(output_empty)
+            output_row[self.classes.index(doc[1])] = 1
+            output.append(output_row)
+
+        X = np.array(training)
+        y = np.array(output)
+
+        start_time = time.time()
+
+        overwrite = True
+
+        if not overwrite:
+            with open(self.synapse_file) as data_file: 
+                self.synapse = json.load(data_file) 
+                self.synapse_0 = np.asarray(self.synapse['synapse0']) 
+                self.synapse_1 = np.asarray(self.synapse['synapse1'])
+
+        self.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=overwrite)
+
+        if overwrite:
+            elapsed_time = time.time() - start_time
+            print("processing time:", elapsed_time, "seconds")
+            with open(self.synapse_file) as data_file: 
+                self.synapse = json.load(data_file) 
+                self.synapse_0 = np.asarray(self.synapse['synapse0']) 
+                self.synapse_1 = np.asarray(self.synapse['synapse1'])
 
     @staticmethod
     def sigmoid(x):
@@ -42,28 +110,25 @@ class NeuralNetwork():
         return(np.array(bag))
 
     def think(self, sentence, show_details=False):
-        x = self.bow(sentence.lower(), words, show_details)
+        x = self.bow(sentence.lower(), self.words, show_details)
         if show_details:
             print("sentence: ", sentence, "\n bow", x)
-
         l0 = x
         l1 = self.sigmoid(np.dot(l0, self.synapse_0))
         l2 = self.sigmoid(np.dot(l1, self.synapse_1))
         return l2
 
-    def train(self, X, y, hidden_neurons=10, alpha=1, epochs=50000, dropout=False, dropout_percent=0.5, overwrite=False, synapse_0=None, synapse_1=None):
+    def train(self, X, y, hidden_neurons=10, alpha=1, epochs=50000, dropout=False, dropout_percent=0.5, overwrite=False):
         if not overwrite:
-            self.synapse_0 = synapse_0
-            self.synapse_1 = synapse_1
             return
-        print("Training with %s neurons, alpha:%s, dropout:%s %s" % (str(hidden_neurons), str(alpha), str(dropout), str(dropout_percent) if dropout else ''))
-        print("Input matrix: %sx%s\nOutput matrix: %sx%s" % (len(X), len(X[0]), 1, len(classes)))
+        print("Training with %s neurons, alpha: %s, dropout: %s %s" % (str(hidden_neurons), str(alpha), str(dropout), str(dropout_percent) if dropout else ''))
+        print("Input matrix: %sx%s\nOutput matrix: %sx%s" % (len(X), len(X[0]), 1, len(self.classes)))
         np.random.seed(1)
 
         last_mean_error = 1
 
         self.synapse_0 = 2 * np.random.random((len(X[0]), hidden_neurons)) - 1
-        self.synapse_1 = 2 * np.random.random((hidden_neurons, len(classes))) - 1
+        self.synapse_1 = 2 * np.random.random((hidden_neurons, len(self.classes))) - 1
 
         prev_synapse_0_weight_update = np.zeros_like(self.synapse_0)
         prev_synapse_1_weight_update = np.zeros_like(self.synapse_1)
@@ -109,14 +174,14 @@ class NeuralNetwork():
 
         now = datetime.datetime.now()
 
-        synapse = {'synapse0': self.synapse_0.tolist(), 'synapse1': self.synapse_1.tolist(),
+        self.synapse = {'synapse0': self.synapse_0.tolist(), 'synapse1': self.synapse_1.tolist(),
                 'datetime': now.strftime("%Y-%m-%d $H:$M"),
-                'words': words,
-                'classes': classes
+                'words': self.words,
+                'classes': self.classes
                 }
 
         with open(self.synapse_file, 'w') as outfile:
-            json.dump(synapse, outfile, indent=4, sort_keys=True)
+            json.dump(self.synapse, outfile, indent=4, sort_keys=True)
         print("saved synapses to:", self.synapse_file)
 
     def classify(self, sentence, show_details=False):
@@ -125,84 +190,18 @@ class NeuralNetwork():
 
         results = [[i,r] for i,r in enumerate(results) if r > ERROR_THRESHOLD] 
         results.sort(key = lambda x: x[1], reverse=True) 
-        return_results =[[classes [r[0]], r[1]] for r in results]
+        return_results =[[self.classes [r[0]], r[1]] for r in results]
         # print ("classification: %s" % return_results)
         return return_results
 
-with open('intents.json') as json_data:
-    training_data = json.load(json_data)
-
-words = []
-classes = []
-documents = []
-ignore_words = ['?', '\'', '!', '.', ',', 'to', 'a', 'the']
-
-for intent in training_data['intents']:
-    for pattern in intent['patterns']:
-        w = nltk.word_tokenize(pattern)
-
-        words.extend(w)
-        documents.append((w, intent['tag']))
-
-        if intent['tag'] not in classes:
-            classes.append(intent['tag'])
-
-words = [stemmer.stem(w.lower()) for w in words if w not in ignore_words]
-words = sorted(list(set(words)))
-
-classes = sorted(list(set(classes)))
-
-print (len(documents), "documents", documents)
-print (len(classes), "classes", classes)
-print (len(words), "unique stemmed words", words)
-
-training = []
-output = []
-
-output_empty = [0] * len(classes)
-
-for doc in documents:
-    bag = []
-    pattern_words = doc[0]
-    pattern_words = [stemmer.stem(word.lower()) for word in pattern_words]
-    for w in words:
-        bag.append(1) if w in pattern_words else bag.append(0)
-    
-    training.append(bag)
-    output_row = list(output_empty)
-    output_row[classes.index(doc[1])] = 1
-    output.append(output_row)
-
-X = np.array(training)
-y = np.array(output)
-
 network = NeuralNetwork()
-start_time = time.time()
-
-overwrite = True
-
-if not overwrite:
-    with open(network.synapse_file) as data_file: 
-        synapse = json.load(data_file) 
-        synapse_0 = np.asarray(synapse['synapse0']) 
-        synapse_1 = np.asarray(synapse['synapse1'])
-
-network.train(X, y, hidden_neurons=20, alpha=0.1, epochs=100000, dropout=False, dropout_percent=0.2, overwrite=overwrite) # , synapse_0=synapse_0, synapse_1=synapse_1
-
-if overwrite:
-    elapsed_time = time.time() - start_time
-    print("processing time:", elapsed_time, "seconds")
-    with open(network.synapse_file) as data_file: 
-        synapse = json.load(data_file) 
-        synapse_0 = np.asarray(synapse['synapse0']) 
-        synapse_1 = np.asarray(synapse['synapse1'])
 
 while True:
     sentence = input("> ")
     result = network.classify(sentence)
     try:
         result_tag = result[0][0]
-        intents = training_data['intents']
+        intents = network.training_data['intents']
     
         for intent in intents:
             if intent['tag'] == result_tag:

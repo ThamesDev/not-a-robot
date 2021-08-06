@@ -5,3 +5,4 @@ blacklist.txt
 neural_network/
 synapses.json
 unknown.json
+__pycache__/
