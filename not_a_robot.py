@@ -109,80 +109,78 @@ async def on_member_join(ctx, member):
 
 @bot.event
 async def on_message(message: dc.Message):
-    global message_ctx
-    global current_guild
-    global guilds
-    global prev_messager
-    global time_tracker
+    if message.guild == None:
+        global message_ctx
+        global current_guild
+        global guilds
+        global prev_messager
+        global time_tracker
 
-    if message.guild != None:
-        return
+        response_tag = chat(message)
 
-    response_tag = chat(message)
+        if time.time() - time_tracker > 60:
+            prev_messager = None
+            message_ctx = 'unknown'
 
-    if time.time() - time_tracker > 60:
-        prev_messager = None
-        message_ctx = 'unknown'
+        if message.author != prev_messager and prev_messager != None:
+            await message.author.send("Sorry, I'm having a conversation with someone else right now, but check back in a minute!")
+            return
 
-    if message.author != prev_messager and prev_messager != None:
-        await message.author.send("Sorry, I'm having a conversation with someone else right now, but check back in a minute!")
-        return
+        if message.author == bot.user:
+            return
 
-    if message.author == bot.user:
-        return
+        if response_tag == None and message_ctx != 'choose_server' and message.guild == None:
+            await message.author.send("Sorry, I don't know what that means, but my creator will help me learn!")
+            message_ctx = 'unknown'
+            prev_messager = message.author
+            time_tracker = time.time()
+            return
 
-    if response_tag == None and message_ctx != 'choose_server':
-        await message.author.send("Sorry, I don't know what that means, but my creator will help me learn!")
-        message_ctx = 'unknown'
-        prev_messager = message.author
-        time_tracker = time.time()
-        return
+        if message_ctx == 'send_dm':
+            print(current_guild)
+            admins = []
+            blacklist = open("blacklist.txt").read().splitlines()
 
-    if message_ctx == 'send_dm':
-        print(current_guild)
-        admins = []
-        blacklist = open("blacklist.txt").read().splitlines()
-
-        for member in current_guild.members:
-            for role in member.roles:
-                if role.name == "administrator" or role.name == "owner":
-                    admins.append(member)
-                    
-        if message.guild is None and message.author != bot.user and str(message.content)[0] != '$':
-            if str(message.author) in blacklist:
-                await message.author.send("You have been added to the blacklist. You cannot send a DM to the admin team!")
-                prev_messager = None
-                return
-            await message.author.send("Sending DM...")
-            for admin in admins:
-                await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
-                await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
-            await message.author.send("DM sent!")
-        prev_messager = None
-    elif message_ctx == 'choose_server':
-        chosen_number = int(message.content) - 1
-        chosen_guild = bot.guilds[chosen_number]
-        current_guild = dc.utils.find(lambda g: g == chosen_guild, bot.guilds)
-        await message.author.send("What should the content of the message be?")
-        message_ctx = 'send_dm'
-        time_tracker = time.time()
-        return
-    
-    if response_tag['tag'] == 'dm':
-        await message.author.send("Which server's admins would you like to DM? (please enter a number)")
-        await message.author.send(guilds)
-        message_ctx = 'choose_server'
-        prev_messager = message.author
-        time_tracker = time.time()
-        return
-    
-    response = np.random.choice(response_tag['responses'])
-    await message.author.send(response)
-    message_ctx = response_tag['tag']
-    if response_tag['tag'] == 'farewell':
-        prev_messager = None
-    else:
-        prev_messager = message.author
+            for member in current_guild.members:
+                for role in member.roles:
+                    if role.name == "administrator" or role.name == "owner":
+                        admins.append(member)
+                        
+            if message.guild is None and message.author != bot.user and str(message.content)[0] != '$':
+                if str(message.author) in blacklist:
+                    await message.author.send("You have been added to the blacklist. You cannot send a DM to the admin team!")
+                    prev_messager = None
+                    return
+                await message.author.send("Sending DM...")
+                for admin in admins:
+                    await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
+                    await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
+                await message.author.send("DM sent!")
+            prev_messager = None
+        elif message_ctx == 'choose_server':
+            chosen_number = int(message.content) - 1
+            chosen_guild = bot.guilds[chosen_number]
+            current_guild = dc.utils.find(lambda g: g == chosen_guild, bot.guilds)
+            await message.author.send("What should the content of the message be?")
+            message_ctx = 'send_dm'
+            time_tracker = time.time()
+            return
+        
+        if response_tag['tag'] == 'dm':
+            await message.author.send("Which server's admins would you like to DM? (please enter a number)")
+            await message.author.send(guilds)
+            message_ctx = 'choose_server'
+            prev_messager = message.author
+            time_tracker = time.time()
+            return
+        
+        response = np.random.choice(response_tag['responses'])
+        await message.author.send(response)
+        message_ctx = response_tag['tag']
+        if response_tag['tag'] == 'farewell':
+            prev_messager = None
+        else:
+            prev_messager = message.author
     await bot.process_commands(message)
         
 

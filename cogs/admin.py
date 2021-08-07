@@ -74,6 +74,11 @@ class Admin(commands.Cog):
                 write_blacklist.close()
                 
                 await ctx.send("User removed from blacklist.")
+        else:
+            await ctx.send("Yeah, you're not an admin")
+            sleep(1)
+            await ctx.send("so I can't do that...")
+
 
     @whitelist.error
     async def kick_error(self, ctx: commands.Context, error: commands.CommandError):
