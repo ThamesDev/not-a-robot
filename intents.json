@@ -12,6 +12,10 @@
     "patterns": ["Send a DM", "DM the admin team", "DM the mod team", "send a message", "Talk to the mods", "Tell the mods"],
     "responses": ["OK, what would you like to send?", "What should the message be?", "Sure, what should I tell them?", "Of course, what would you like to send?"]
     },
+    {"tag": "greeting-response",
+    "patterns": ["I'm fine, thanks", "I feel great!", "I want to die", "I feel awful"],
+    "responses": ["Ok. Right, down to business: if you don't know what to do, just ask for help!", "It's good to know how you are. What can I do for you?", "Yeah, me too. Alrightm what do you want me to do?"]
+    },
     {"tag": "farewell",
     "patterns": ["bye", "goodbye", "see you later", "adios", "good day", "See you tomorrow!", "cheerio", "toodle pip"],
     "responses": ["See ya!", "OK, bye!", "Catch you later!", "Adios", "So long, friend"]
