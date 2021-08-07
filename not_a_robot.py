@@ -160,6 +160,7 @@ async def on_message(message: dc.Message):
                     await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
                 await message.author.send("DM sent!")
                 await message.author.send("You can dismiss me for other people to use by saying bye!")
+            message_ctx = 'unknown'
             return
         elif message_ctx == 'choose_server':
             try:
