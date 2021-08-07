@@ -14,7 +14,7 @@
     },
     {"tag": "greeting-response",
     "patterns": ["I'm fine, thanks", "I feel great!", "I want to die", "I feel awful"],
-    "responses": ["Ok. Right, down to business: if you don't know what to do, just ask for help!", "It's good to know how you are. What can I do for you?", "Yeah, me too. Alrightm what do you want me to do?"]
+    "responses": ["Ok. Right, down to business: if you don't know what to do, just ask for help!", "It's good to know how you are. What can I do for you?", "Yeah, me too. Alright, what do you want me to do?"]
     },
     {"tag": "farewell",
     "patterns": ["bye", "goodbye", "see you later", "adios", "good day", "See you tomorrow!", "cheerio", "toodle pip"],
