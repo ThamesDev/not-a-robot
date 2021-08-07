@@ -64,7 +64,7 @@ class NeuralNetwork():
 
         start_time = time.time()
 
-        overwrite = True
+        overwrite = False
 
         if not overwrite:
             with open(self.synapse_file) as data_file: 

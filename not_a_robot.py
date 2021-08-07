@@ -62,42 +62,40 @@ def chat(message: dc.Message):
 
         return response_tag
     except IndexError:
-        with open('unknown.json') as file:
-            unknown = json.load(file)
-        sentence = sentence.lower()
-        if sentence in unknown:
-            unknown[sentence] += 1
-        else:
-            unknown[sentence] = 1
-        unknown = {k: v for k, v in sorted(unknown.items(), key=lambda item: item[1], reverse=True)}
-        with open('unknown.json', 'w') as file:
-            json.dump(unknown, file, indent=4, sort_keys=False)
-        print("saved unknown sentence to: unknown.json")
+        if message.author != bot.user:
+            with open('unknown.json') as file:
+                unknown = json.load(file)
+            sentence = sentence.lower()
+            if sentence in unknown:
+                unknown[sentence] += 1
+            else:
+                unknown[sentence] = 1
+            unknown = {k: v for k, v in sorted(unknown.items(), key=lambda item: item[1], reverse=True)}
+            with open('unknown.json', 'w') as file:
+                json.dump(unknown, file, indent=4, sort_keys=False)
+            print("saved unknown sentence to: unknown.json")
         return None
 
 message_ctx = 'unknown'
-
 guilds = ''
-for i, guild in bot.guilds:
-    guilds += str(i + 1) + ". " + str(guild.name) + '\n'
 
-guild: dc.Guild
+current_guild: dc.Guild
 prev_messager: dc.User = None
 time_tracker = time.time()
 
 
 @bot.event
 async def on_ready():
-    # guild = dc.utils.find(lambda g: g.name == GUILD, bot.guilds)
+    global guilds
     print(f'{bot.user} is online!')
-    
-    # members = ', '.join([member.name for member in guild.members])
-    # print(f'Guild Members:\n{members}')
-    # send_channel = bot.get_channel(850642371318513684)
     game=dc.Game(name='Modding the server!', type=1, url='http://www.johnmulaney.com/')
 
     await bot.change_presence(status=dc.Status.online, activity=game)
-    # await send_channel.send("NotARobot is online!")
+    if len(bot.guilds) == 1:
+        guilds = '1. ' + bot.guilds[0].name
+    else:
+        for i, guild in bot.guilds:
+            guilds += str(i + 1) + ". " + str(guild.name) + '\n'
 
 @bot.event
 async def on_member_join(ctx, member):
@@ -112,10 +110,14 @@ async def on_member_join(ctx, member):
 @bot.event
 async def on_message(message: dc.Message):
     global message_ctx
-    global guild
+    global current_guild
     global guilds
     global prev_messager
     global time_tracker
+
+    if message.guild != None:
+        return
+
     response_tag = chat(message)
 
     if time.time() - time_tracker > 60:
@@ -129,33 +131,19 @@ async def on_message(message: dc.Message):
     if message.author == bot.user:
         return
 
-    if response_tag == None:
-        print("Sorry, I don't know what that means, but my creator will help me learn!")
+    if response_tag == None and message_ctx != 'choose_server':
+        await message.author.send("Sorry, I don't know what that means, but my creator will help me learn!")
         message_ctx = 'unknown'
         prev_messager = message.author
         time_tracker = time.time()
         return
 
-    if message_ctx == 'dm':
-        await message.author.send("Which server's admins would you like to DM? (please enter a number)")
-        await message.author.send(guilds)
-        message_ctx = 'choose_server'
-        prev_messager = message.author
-        time_tracker = time.time()
-        return
-    elif message_ctx == 'choose_server':
-        chosen_number = int(message.content) - 1
-        chosen_guild = bot.guilds[chosen_number]
-        guild = dc.utils.find(lambda g: g.name == chosen_guild, bot.guilds)
-        await message.author.send("What should the content of the message be?")
-        message_ctx = 'send_dm'
-        time_tracker = time.time()
-        return
-    elif message_ctx == 'send_dm':
+    if message_ctx == 'send_dm':
+        print(current_guild)
         admins = []
         blacklist = open("blacklist.txt").read().splitlines()
 
-        for member in guild.members:
+        for member in current_guild.members:
             for role in member.roles:
                 if role.name == "administrator" or role.name == "owner":
                     admins.append(member)
@@ -171,14 +159,30 @@ async def on_message(message: dc.Message):
                 await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
             await message.author.send("DM sent!")
         prev_messager = None
+    elif message_ctx == 'choose_server':
+        chosen_number = int(message.content) - 1
+        chosen_guild = bot.guilds[chosen_number]
+        current_guild = dc.utils.find(lambda g: g == chosen_guild, bot.guilds)
+        await message.author.send("What should the content of the message be?")
+        message_ctx = 'send_dm'
+        time_tracker = time.time()
+        return
+    
+    if response_tag['tag'] == 'dm':
+        await message.author.send("Which server's admins would you like to DM? (please enter a number)")
+        await message.author.send(guilds)
+        message_ctx = 'choose_server'
+        prev_messager = message.author
+        time_tracker = time.time()
+        return
+    
+    response = np.random.choice(response_tag['responses'])
+    await message.author.send(response)
+    message_ctx = response_tag['tag']
+    if response_tag['tag'] == 'farewell':
+        prev_messager = None
     else:
-        response = np.random.choice(response_tag['responses'])
-        await message.author.send(response)
-        message_ctx = response_tag['tag']
-        if response_tag['tag'] == 'farewell':
-            prev_messager = None
-        else:
-            prev_messager = message.author
+        prev_messager = message.author
     await bot.process_commands(message)
         
 
