@@ -2,3 +2,7 @@
 err.log
 cogs/__pycache__/
 blacklist.txt
+neural_network/
+synapses.json
+unknown.json
+__pycache__/

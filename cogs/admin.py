@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.ext.commands.errors import MemberNotFound
 from dotenv import load_dotenv
 from os import getenv, write
+from time import sleep
 
 from discord.ext.commands import bot
 
@@ -34,6 +35,10 @@ class Admin(commands.Cog):
                     f.write(str(member))
                     f.write('\n')
                 await ctx.send("User added to blacklist.")
+        else:
+            await ctx.send("Yeah, you're not an admin")
+            sleep(1)
+            await ctx.send("so I can't do that...")
 
     @blacklist.error
     async def kick_error(self, ctx: commands.Context, error: commands.CommandError):
@@ -69,6 +74,11 @@ class Admin(commands.Cog):
                 write_blacklist.close()
                 
                 await ctx.send("User removed from blacklist.")
+        else:
+            await ctx.send("Yeah, you're not an admin")
+            sleep(1)
+            await ctx.send("so I can't do that...")
+
 
     @whitelist.error
     async def kick_error(self, ctx: commands.Context, error: commands.CommandError):
