@@ -118,8 +118,6 @@ async def on_message(message: dc.Message):
         global time_tracker
 
         response_tag = chat(message)
-        print(message.author)
-        print(message_ctx)
 
         if time.time() - time_tracker > 60:
             prev_messager = None
@@ -160,6 +158,7 @@ async def on_message(message: dc.Message):
                     await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
                 await message.author.send("DM sent!")
                 await message.author.send("You can dismiss me for other people to use by saying bye!")
+            prev_messager = None
             message_ctx = 'unknown'
             return
         elif message_ctx == 'choose_server':
