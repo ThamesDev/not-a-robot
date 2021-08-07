@@ -173,7 +173,7 @@ async def on_message(message: dc.Message):
         prev_messager = None
     else:
         response = np.random.choice(response_tag['responses'])
-        print(response)
+        await message.author.send(response)
         message_ctx = response_tag['tag']
         if response_tag['tag'] == 'farewell':
             prev_messager = None
