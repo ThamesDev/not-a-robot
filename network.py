@@ -193,37 +193,3 @@ class NeuralNetwork():
         return_results =[[self.classes [r[0]], r[1]] for r in results]
         # print ("classification: %s" % return_results)
         return return_results
-
-network = NeuralNetwork()
-
-while True:
-    sentence = input("> ")
-    result = network.classify(sentence)
-    try:
-        result_tag = result[0][0]
-        intents = network.training_data['intents']
-    
-        for intent in intents:
-            if intent['tag'] == result_tag:
-                response_tag = intent
-
-        response = np.random.choice(response_tag['responses'])
-        print(response)
-
-        if response_tag['tag'] == 'farewell':
-            break
-    except IndexError:
-        print("I'm not sure what that means...")
-        with open('unknown.json') as file:
-            unknown = json.load(file)
-        sentence = sentence.lower()
-        if sentence in unknown:
-            unknown[sentence] += 1
-        else:
-            unknown[sentence] = 1
-        unknown = {k: v for k, v in sorted(unknown.items(), key=lambda item: item[1], reverse=True)}
-        with open('unknown.json', 'w') as file:
-            json.dump(unknown, file, indent=4, sort_keys=False)
-        print("saved unknown sentence to: unknown.json")
-            
-    
