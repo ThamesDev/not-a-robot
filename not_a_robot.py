@@ -155,9 +155,9 @@ async def on_message(message: dc.Message):
                     prev_messager = None
                     return
                 await message.author.send("Sending DM...")
-                # for admin in admins:
-                #     await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
-                #     await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
+                for admin in admins:
+                    await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
+                    await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
                 await message.author.send("DM sent!")
                 await message.author.send("You can dismiss me for other people to use by saying bye!")
             return
