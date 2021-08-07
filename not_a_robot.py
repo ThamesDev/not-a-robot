@@ -2,6 +2,7 @@
 
 # TODO: This contains some unnecessary imports
 from math import remainder
+from discord.ext.commands.errors import ConversionError, NoEntryPointError
 import numpy as np
 
 import discord as dc
@@ -62,7 +63,7 @@ def chat(message: dc.Message):
 
         return response_tag
     except IndexError:
-        if message.author != bot.user:
+        if message.content != '1':
             with open('unknown.json') as file:
                 unknown = json.load(file)
             sentence = sentence.lower()
@@ -117,6 +118,8 @@ async def on_message(message: dc.Message):
         global time_tracker
 
         response_tag = chat(message)
+        print(message.author)
+        print(message_ctx)
 
         if time.time() - time_tracker > 60:
             prev_messager = None
@@ -129,7 +132,7 @@ async def on_message(message: dc.Message):
         if message.author == bot.user:
             return
 
-        if response_tag == None and message_ctx != 'choose_server' and message.guild == None:
+        if response_tag == None and message_ctx != 'choose_server' and message_ctx != 'send_dm' and message.guild == None:
             await message.author.send("Sorry, I don't know what that means, but my creator will help me learn!")
             message_ctx = 'unknown'
             prev_messager = message.author
@@ -146,20 +149,31 @@ async def on_message(message: dc.Message):
                     if role.name == "administrator" or role.name == "owner":
                         admins.append(member)
                         
-            if message.guild is None and message.author != bot.user and str(message.content)[0] != '$':
+            if message.author != bot.user and str(message.content)[0] != '$':
                 if str(message.author) in blacklist:
                     await message.author.send("You have been added to the blacklist. You cannot send a DM to the admin team!")
                     prev_messager = None
                     return
                 await message.author.send("Sending DM...")
-                for admin in admins:
-                    await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
-                    await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
+                # for admin in admins:
+                #     await admin.send(f'User {message.author} sent this message to the admin team: {message.content}')
+                #     await admin.send(f'If you want to blacklist this user, simply type\n```\n$blacklist @User\n```\nin the server, replacing that with the user\'s username')
                 await message.author.send("DM sent!")
-            prev_messager = None
+                await message.author.send("You can dismiss me for other people to use by saying bye!")
+            return
         elif message_ctx == 'choose_server':
-            chosen_number = int(message.content) - 1
-            chosen_guild = bot.guilds[chosen_number]
+            try:
+                chosen_number = int(message.content) - 1
+            except ValueError:
+                await message.author.send(f'{message.content} is not a valid integer...')
+                message_ctx = 'unknown'
+                return
+            try:
+                chosen_guild = bot.guilds[chosen_number]
+            except IndexError:
+                await message.author.send(f'{message.content} wasn\'t one of the options...')
+                message_ctx = 'unknown'
+                return
             current_guild = dc.utils.find(lambda g: g == chosen_guild, bot.guilds)
             await message.author.send("What should the content of the message be?")
             message_ctx = 'send_dm'
